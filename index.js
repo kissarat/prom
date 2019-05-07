@@ -45,6 +45,10 @@ const server = http.createServer(async function (req, res) {
   let status = 200
   let data
   const jsonp = /callback=([\w_]+)/.exec(req.url)
+  const hasContent = /https?:\/\//.test(req.url)
+  // if (hasContent) {
+  //   req.url = req.url.replace('content=1', '')
+  // }
   const rsHeaders = {
     'content-type': (jsonp ? 'text/javascript' : 'application/json') + '; charset=utf8'
   }
@@ -76,8 +80,10 @@ const server = http.createServer(async function (req, res) {
         data = {
           error: {
             message: 'Unknown response'
-          },
-          content: body
+          }
+        }
+        if (hasContent) {
+          data.content = body
         }
       }
     }
@@ -129,7 +135,7 @@ const server = http.createServer(async function (req, res) {
       if (prom.targeting_params) {
         data.targeting_params = prom.targeting_params
       }
-      if (0 === products.length) {
+      if (hasContent && 0 === products.length) {
         data.content = body
       }
     }
